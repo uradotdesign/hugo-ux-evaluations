@@ -1,0 +1,4 @@
+{{ define "main" }}
+  {{ partial "slides" (slice .Page) }}
+  {{ partial "slides" (where .Pages "Kind" "page") }}
+{{ end }}
