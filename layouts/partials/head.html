@@ -11,10 +11,12 @@
 <!-- Theme & CSS -->
 {{ $css_reset := "https://unpkg.com/reveal.js@5.0.0/dist/reset.css" }}
 {{ with resources.GetRemote $css_reset (dict "key" "5.0.0-reset.css") }}
+  {{ warnf "Fetching .GetRemote %q" $css_reset }}
   {{ with .Err }}
     {{ errorf "%s" . }}
   {{ else }}
-  <link rel="stylesheet" href="{{ .RelPermalink }}">
+  {{ warnf "Serving cached resource: %q" .RelPermalink }}
+  <link rel="stylesheet" href="{{ .RelPermalink | absURL }}">
   {{ end }}
 {{ else }}
   {{ errorf "Unable to .GetRemote %q" $css_reset }}
@@ -25,7 +27,8 @@
   {{ with .Err }}
     {{ errorf "%s" . }}
   {{ else }}
-  <link rel="stylesheet" href="{{ .RelPermalink }}">
+  {{ warnf "Serving cached resource: %q" .RelPermalink }}
+  <link rel="stylesheet" href="{{ .RelPermalink | absURL }}">
   {{ end }}
 {{ else }}
   {{ errorf "Unable to .GetRemote %q" $css_reveal }}
