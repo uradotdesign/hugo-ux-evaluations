@@ -1,15 +1,32 @@
-<!-- polyfill needed for IE11 and below -->
+<!-- Polyfill needed for IE11 and below -->
 <script type="text/javascript" src={{ "js/object-assign.js" | absURL }}></script>
-<!-- Printing and PDF exports -->
 
-<script src="{{ printf "js/reveal.js" | absURL }}"></script>
+<!-- Printing and PDF exports -->
+{{ $js_reveal := "https://unpkg.com/reveal.js@5.0.0/dist/reveal.js" }}
+{{ with resources.GetRemote $js_reveal (dict "key" "5.0.0-reveal.js")  }}
+{{ with .Err }}
+    {{ errorf "%s" . }}
+  {{ else }}
+  <script src="{{ .RelPermalink }}"></script>
+  {{ end }}
+{{ else }}
+  {{ errorf "Unable to get remote resource %q" $js_reveal }}
+{{ end }}
 
 <!-- load default and user plugins -->
 {{- $plugins := partial "internal/plugins" . -}}
 {{ $pluginNames := slice }}
 
 {{- range $plugins }}
-  <script type="text/javascript" src="{{ .source | absURL }}"></script>
+  {{ with resources.GetRemote .remote (dict "key" .source) }}
+    {{ with .Err }}
+      {{ errorf "%s" . }}
+    {{ else }}
+    <script src="{{ .RelPermalink }}"></script>
+    {{ end }}
+  {{ else }}
+    {{ errorf "Unable to .GetRemote %q" .remote }}
+  {{ end }}
   {{ $pluginNames = $pluginNames | append .name }}
 {{- end -}}
 
@@ -48,53 +65,3 @@
 
 <!-- Slideshow Settings -->
 <script type="text/javascript" src="{{ "js/settings.js" | absURL }}"></script>
-
-{{ $hasMermaid := false }}
-{{ $hasMath := false }}
-{{ range .Site.AllPages }}
-  {{ if .Store.Get "hasMermaid" }}
-    {{ $hasMermaid = true }}
-  {{ end }}
-  {{ if or .Params.math (.Store.Get "hasMath")  }}
-    {{ $hasMath = true }}
-  {{ end }}
-{{ end }}
-
-{{ if $hasMermaid }}
-<script type="text/javascript" src="{{ "js/mermaid.min.js" | absURL }}"></script>
-<script type="text/javascript">
-  mermaid.initialize({startOnLoad: false});
-  let render = (event) => {
-    let mermaidElems = event.currentSlide.querySelectorAll('.mermaid');
-    if (!mermaidElems.length){
-        return
-    }
-    mermaidElems.forEach(mermaidElem => {
-        let processed = mermaidElem.getAttribute('data-processed');
-        if (!processed){
-            // https://github.com/mermaid-js/mermaid/issues/311#issuecomment-332557344
-            mermaid.init(undefined, mermaidElem);
-        }
-    });
-  };
-  // support current page reload with possible mermaid element
-  render({currentSlide: Reveal.getCurrentSlide()});
-
-  Reveal.on('slidechanged', render);
-  Reveal.on('ready', render);
-</script>
-{{ end }}
-
-{{ if $hasMath }}
-<script>
-  MathJax = {
-    tex: {
-      inlineMath: [['$', '$'], ['\\(', '\\)']]
-    },
-    svg: {
-      fontCache: 'global'
-    }
-  };
-</script>
-<script type="text/javascript" id="MathJax-script" async src="{{ "js/tex-svg.js" | absURL }}"></script>
-{{ end }}

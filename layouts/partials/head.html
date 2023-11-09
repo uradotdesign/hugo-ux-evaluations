@@ -1,14 +1,36 @@
 <meta charset="utf-8">
+
 <title>{{ or .Page.Title .Site.Title }}</title>
 {{ with $.Param "description" }}<meta name="description" content="{{ . }}">{{ end }}
 {{ with .Site.Author.name }}<meta name="author" content="{{ . }}">{{ end }}
+
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <!-- Theme & CSS -->
-<link rel="stylesheet" href="{{ printf "css/reset.css" | absURL }}">
-<link rel="stylesheet" href="{{ printf "css/reveal.css" | absURL }}">
+{{ $css_reset := "https://unpkg.com/reveal.js@5.0.0/dist/reset.css" }}
+{{ with resources.GetRemote $css_reset (dict "key" "5.0.0-reset.css") }}
+  {{ with .Err }}
+    {{ errorf "%s" . }}
+  {{ else }}
+  <link rel="stylesheet" href="{{ .RelPermalink }}">
+  {{ end }}
+{{ else }}
+  {{ errorf "Unable to .GetRemote %q" $css_reset }}
+{{ end }}
+
+{{ $css_reveal := "https://unpkg.com/reveal.js@5.0.0/dist/reveal.css" }}
+{{ with resources.GetRemote $css_reveal (dict "key" "5.0.0-reveal.css") }}
+  {{ with .Err }}
+    {{ errorf "%s" . }}
+  {{ else }}
+  <link rel="stylesheet" href="{{ .RelPermalink }}">
+  {{ end }}
+{{ else }}
+  {{ errorf "Unable to .GetRemote %q" $css_reveal }}
+{{ end }}
+
 <link rel="stylesheet" href="{{ printf "css/fonts.css" | absURL }}">
 <link rel="stylesheet" href="{{ printf "css/style.css" | absURL }}" data-type="dist-theme" id="them">
 <link rel="stylesheet" href="{{ printf "css/ux-evaluation.css" | absURL }}">
